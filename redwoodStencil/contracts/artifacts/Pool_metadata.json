@@ -9,6 +9,43 @@
 				"constant": false,
 				"inputs": [
 					{
+						"name": "tokenAmount",
+						"type": "uint256"
+					},
+					{
+						"name": "pineAmount",
+						"type": "uint256"
+					}
+				],
+				"name": "withdraw",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"name": "testMe",
+						"type": "uint256"
+					}
+				],
+				"name": "testing",
+				"outputs": [
+					{
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
 						"name": "_token0",
 						"type": "address"
 					},
@@ -38,6 +75,47 @@
 				"payable": false,
 				"stateMutability": "nonpayable",
 				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"name": "",
+						"type": "address"
+					},
+					{
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"name": "traderBalances",
+				"outputs": [
+					{
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"name": "tokenAmount",
+						"type": "uint256"
+					},
+					{
+						"name": "pineAmount",
+						"type": "uint256"
+					}
+				],
+				"name": "deposit",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
 			}
 		],
 		"devdoc": {
@@ -49,9 +127,9 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/Pool.sol": "Pool"
+			"redwoodStencil/contracts/Pool.sol": "Pool"
 		},
-		"evmVersion": "constantinople",
+		"evmVersion": "byzantium",
 		"libraries": {},
 		"optimizer": {
 			"enabled": false,
@@ -60,43 +138,43 @@
 		"remappings": []
 	},
 	"sources": {
-		"contracts/Exc.sol": {
-			"keccak256": "0xa0fc2209e84a67a06ac630638d32c867e1af137aa291bac0e53f05aa3cd22184",
+		"redwoodStencil/contracts/Exc.sol": {
+			"keccak256": "0x1295c94061b3ce88b118a12405c2c31f101e108145e8789a11770282ffba683e",
 			"urls": [
-				"bzzr://bda97700e43a38e975b30ee637d2e605e12e1a174cd36fa9ff8c6124a68d6f03"
+				"bzzr://a6f56aa1b1ce068a681a7fb7f43e7250a75540d2228fdea3400acd75bd9fb4b4"
 			]
 		},
-		"contracts/IExc.sol": {
-			"keccak256": "0x70cfd229f740886ae980aefe80605fccdb1ae3987edeafffca9c663f045b87a8",
+		"redwoodStencil/contracts/IExc.sol": {
+			"keccak256": "0xe5d19c3fdea91ae5bdbeaee68b48ea5b5eb213d5f2cab3879d6c638d63ba3099",
 			"urls": [
-				"bzzr://c4021060be9fe362571005c3126d7fbacc1e9ab5efbd4c64240d00723d6c4a21"
+				"bzzr://ecd2abe25c8a754cbbc4a1165aaa7cd968f708ff7c0eb04a2de5b8d05775279f"
 			]
 		},
-		"contracts/Pool.sol": {
-			"keccak256": "0x68ecfd20b928175610947b56866c2d2f96ba383f3eeb219ca05b7a084f71044a",
+		"redwoodStencil/contracts/Pool.sol": {
+			"keccak256": "0x8205d4d512602c4d6f689430e0e9d17fce1fb1b799b781b3669e4bbed94c7df0",
 			"urls": [
-				"bzzr://759abed1d17dff36b5069d287959b8c97b82e9f83ab203a271a3b7caa089eb23"
+				"bzzr://082342825db6f9055ff77261a6784414c523020ec71fbcb6f49ea5f6ace63600"
 			]
 		},
-		"contracts/libraries/GSN/Context.sol": {
+		"redwoodStencil/contracts/libraries/GSN/Context.sol": {
 			"keccak256": "0x90a3995645af7562d84b9d69363ffa5ae7217714ab61e951bf7bc450f40e4061",
 			"urls": [
 				"bzzr://51482c01bddf23793bddee43b60ab9578a62948a4f2082def24ea792a553b055"
 			]
 		},
-		"contracts/libraries/math/SafeMath.sol": {
+		"redwoodStencil/contracts/libraries/math/SafeMath.sol": {
 			"keccak256": "0x640b6dee7a4b830bdfd52b5031a07fc2b12209f5b2e29e5d364a7d37f69d8076",
 			"urls": [
 				"bzzr://292843005e754e752644f767477ec5ad7a1ffc91ddb18c38b8079c62f3993cad"
 			]
 		},
-		"contracts/libraries/token/ERC20/ERC20.sol": {
+		"redwoodStencil/contracts/libraries/token/ERC20/ERC20.sol": {
 			"keccak256": "0xb15af804e2bc97db51e4e103f13de9fe13f87e6b835d7a88c897966c0e58506e",
 			"urls": [
 				"bzzr://6200c125af376381ae6c5415b8f3c1cb83889be20a7a51d67ac607487a10313b"
 			]
 		},
-		"contracts/libraries/token/ERC20/IERC20.sol": {
+		"redwoodStencil/contracts/libraries/token/ERC20/IERC20.sol": {
 			"keccak256": "0xe5bb0f57cff3e299f360052ba50f1ea0fff046df2be070b6943e0e3c3fdad8a9",
 			"urls": [
 				"bzzr://cf2d583b8dce38d0617fdcd65f2fd9f126fe17b7f683b5a515ea9d2762d8b062"

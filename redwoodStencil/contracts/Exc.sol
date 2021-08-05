@@ -88,7 +88,7 @@ contract Exc is IExc{
             require(balances[msg.sender][ticker] >= amount);
             IERC20(tokens[ticker].tokenAddress).transferFrom(msg.sender, address(this), amount);
             balances[address(this)][ticker] = balances[address(this)][ticker].add(amount);
-            balances[msg.sender][ticker] -= balances[msg.sender][ticker].sub(amount);
+            balances[msg.sender][ticker] = balances[msg.sender][ticker].sub(amount);
     }
     
     // todo: implement withdraw, which should do the opposite of deposit. The trader should not be able to withdraw more than
@@ -98,74 +98,74 @@ contract Exc is IExc{
          bytes32 ticker)
         external {
             require(balances[address(this)][ticker] >= amount);
-            IERC20(tokens[ticker].tokenAddress).transferFrom(address(this), msg.sender, amount);
+            IERC20(tokens[ticker].tokenAddress).transfer(msg.sender, amount);
             balances[address(this)][ticker] = balances[address(this)][ticker].sub(amount);
             balances[msg.sender][ticker] = balances[msg.sender][ticker].add(amount);
      }
      
-     function sort(Order[] memory data) public returns(Order[] memory) {
-       quickSort(data, uint(0), uint(data.length - 1));
-       return data;
-    }
+    //  function sort(Order[] memory data) public {
+    //   quickSortHelp(data, uint(0), uint(data.length - 1));
+    // //   return data;
+    // }
     
-    function quickSortHelp(Order[] memory arr, int left, int right) internal{
-        int i = left;
-        int j = right;
-        if(i==j) return;
-        uint pivot = arr[uint(left + (right - left) / 2)].price;
-        while (i <= j) {
-            while (arr[uint(i)].price < pivot) i++;
-            while (pivot < arr[uint(j)].price) j--;
-            if (i <= j) {
-                (arr[uint(i)], arr[uint(j)]) = (arr[uint(j)], arr[uint(i)]);
-                i++;
-                j--;
-            }
-        }
-        if (left < j)
-            quickSortHelp(arr, left, j);
-        if (i < right)
-            quickSortHelp(arr, i, right);
-    }
+    // function quickSortHelp(Order[] memory arr, uint left, uint right) internal{
+    //     uint i = left;
+    //     uint j = right;
+    //     if(i==j) return;
+    //     uint pivot = arr[uint(left + (right - left) / 2)].price;
+    //     while (i <= j) {
+    //         while (arr[uint(i)].price < pivot) i++;
+    //         while (pivot < arr[uint(j)].price) j--;
+    //         if (i <= j) {
+    //             (arr[uint(i)], arr[uint(j)]) = (arr[uint(j)], arr[uint(i)]);
+    //             i++;
+    //             j--;
+    //         }
+    //     }
+    //     if (left < j)
+    //         quickSortHelp(arr, left, j);
+    //     if (i < right)
+    //         quickSortHelp(arr, i, right);
+    // }
      
-     function quickSort(Order[] memory arr, uint left, uint right) internal {
-        uint pivot = arr.length/2;
-        Order memory temp = arr[pivot];
-        delete arr[pivot];
-        arr[pivot] = arr[arr.length-1];
-        arr[arr.length-1] = arr[pivot];
-        bool done = false;
-        while (!done) {
-            uint256 leftItem = left;
-            uint256 rightItem = right;
-            while (arr[leftItem].price < arr[right].price) {
-                left++;
-            }
-            while (arr[rightItem].price > arr[right].price) {
-                right++;
-            }
-            if (left < right) {
-                (arr[leftItem], arr[rightItem]) = (arr[rightItem], arr[leftItem]);
-            } else {
-                (arr[leftItem], arr[right]) = (arr[right], arr[leftItem]);
-                done = true;
-                quickSort(arr, left, leftItem - 1);
-                quickSort(arr, leftItem + 1, right);
-            }
-        }
-    }
+    //  function quickSort(Order[] memory arr, uint left, uint right) internal {
+    //     uint pivot = arr.length/2;
+    //     Order memory temp = arr[pivot];
+    //     delete arr[pivot];
+    //     arr[pivot] = arr[arr.length-1];
+    //     arr[arr.length-1] = arr[pivot];
+    //     bool done = false;
+    //     while (!done) {
+    //         uint256 leftItem = left;
+    //         uint256 rightItem = right;
+    //         while (arr[leftItem].price < arr[right].price) {
+    //             left++;
+    //         }
+    //         while (arr[rightItem].price > arr[right].price) {
+    //             right++;
+    //         }
+    //         if (left < right) {
+    //             (arr[leftItem], arr[rightItem]) = (arr[rightItem], arr[leftItem]);
+    //         } else {
+    //             (arr[leftItem], arr[right]) = (arr[right], arr[leftItem]);
+    //             done = true;
+    //             quickSort(arr, left, leftItem - 1);
+    //             quickSort(arr, leftItem + 1, right);
+    //         }
+    //     }
+    // }
     
-    function reverseArray(Order[] memory toReverse) internal returns(Order[] memory){
-        Order[] memory reversedOrders;
-        uint last = toReverse.length - 1;
-        for (uint i = 0; i < toReverse.length; i++) {
-            if (i == last || i == (toReverse.length/2)){
-                return reversedOrders;
-            }
-            reversedOrders[i] = toReverse[last];
-            reversedOrders[last] = toReverse[i];
-        }
-    }
+    // function reverseArray(Order[] memory toReverse) internal returns(Order[] memory){
+    //     Order[] memory reversedOrders;
+    //     uint last = toReverse.length - 1;
+    //     for (uint i = 0; i < toReverse.length; i++) {
+    //         if (i == last || i == (toReverse.length/2)){
+    //             return reversedOrders;
+    //         }
+    //         reversedOrders[i] = toReverse[last];
+    //         reversedOrders[last] = toReverse[i];
+    //     }
+    // }
 
     
     // todo: implement makeLimitOrder, which creates a limit order based on the parameters provided. This method should only be
@@ -174,6 +174,7 @@ contract Exc is IExc{
     
     // todo: implement a sorting algorithm for limit orders, based on best prices for market orders having the highest priority.
     // i.e., a limit buy order with a high price should have a higher priority in the orderbook.
+    
     function makeLimitOrder(
         bytes32 ticker,
         uint amount,
@@ -181,12 +182,18 @@ contract Exc is IExc{
         Side side)
         external {
             // is it msg.sender or address(this?)
-            require(balances[address(this)][ticker] >= amount);
+            // require(balances[address(this)][ticker] >= amount);
+            if(side == Side.SELL) {
+            require(
+                traderBalances[msg.sender][ticker] >= amount,
+                'token balance too low'
+            );
+            }
             require(ticker != 'PIN');
             
-            if (ticker == "pine"){
-                return;
-            }
+            // if (ticker == "pine"){
+            //     return;
+            // }
             
             bool is_in = false;
             for (uint i = 0; i < tokenList.length; i++){
@@ -194,10 +201,11 @@ contract Exc is IExc{
                     is_in == true;
                 }
             }
+            require(is_in == true);
             
-            if (is_in == false){
-                return;
-            }
+            // if (is_in == false){
+            //     return;
+            // }
             
             if (side == Side.BUY){
                 if (balances[msg.sender]['PIN'] < amount.mul(price))
@@ -215,25 +223,105 @@ contract Exc is IExc{
             // orderBook[ticker].push(newLimitOrder);
             // orderSort(orderBook[ticker]);
             
-            Order memory newLimitOrder = Order(nextOrderID, msg.sender, side, ticker, amount, 0, price, now);
+            // Order memory newLimitOrder = Order(nextOrderID, msg.sender, side, ticker, amount, 0, price, now);
             
-            if (orderBook[ticker][uint(side)].length == 0){
-                orderBook[ticker][uint(side)].length++;
-                orderBook[ticker][uint(side)].push(newLimitOrder);
-             }else {
-                orderBook[ticker][uint(side)].length++;
-                orderBook[ticker][uint(side)].push(newLimitOrder);
-                if (side == Side.BUY) {
+            // orderBook[ticker][uint(side)].length++;
+            orderBook[ticker][uint(side)].push(Order(nextOrderID, msg.sender, side, ticker, amount, 0, price, now));
+            if (side == Side.BUY) {
                 // if buy, sort limit orders with highest prices as highest priority
-                    quickSort(orderBook[ticker][uint(side)],0,orderBook[ticker][uint(side)].length-1);
-                } else {
-                // if sell, sort limit orders with
-                quickSort(orderBook[ticker][uint(side)],0,orderBook[ticker][uint(side)].length-1);
-                orderBook[ticker][uint(side)] = reverseArray(orderBook[ticker][uint(side)]);
+                bool swap = true;
+                while (swap) {
+                    swap = false;
+                    for (uint i = 0; i < orderBook[ticker][uint(side)].length-1; i++) {
+                        if (orderBook[ticker][uint(side)][i].price < orderBook[ticker][uint(side)][i + 1].price) {
+                        Order memory temp = orderBook[ticker][uint(side)][i];
+                        orderBook[ticker][uint(side)][i] = orderBook[ticker][uint(side)][i + 1];
+                        orderBook[ticker][uint(side)][i + 1] = temp;
+                            // (orderBook[ticker][uint(side)][i], orderBook[ticker][uint(side)][i+1]) = (orderBook[ticker][uint(side)][i+1], orderBook[ticker][uint(side)][i]);
+                            swap = true;
+                        }
+                    }
+                }
+            } else {
+            // if sell, sort limit orders with
+                // sort(orderBook[ticker][uint(side)]);
+                // orderBook[ticker][uint(side)] = reverseArray(orderBook[ticker][uint(side)]);
+                bool swap = true;
+                while (swap) {
+                    swap = false;
+                    for (uint i = 0; i < orderBook[ticker][uint(side)].length-1; i++) {
+                        if (orderBook[ticker][uint(side)][i].price > orderBook[ticker][uint(side)][i + 1].price) {
+                            Order memory temp = orderBook[ticker][uint(side)][i];
+                            orderBook[ticker][uint(side)][i] = orderBook[ticker][uint(side)][i + 1];
+                            orderBook[ticker][uint(side)][i + 1] = temp;
+                            // (orderBook[ticker][uint(side)][i], orderBook[ticker][uint(side)][i+1]) = (orderBook[ticker][uint(side)][i+1], orderBook[ticker][uint(side)][i]);
+                            swap = true;
+                        }
+                    }
                 }
             }
+        }
+    
+    // function makeLimitOrder(
+    //     bytes32 ticker,
+    //     uint amount,
+    //     uint price,
+    //     Side side)
+    //     external {
+    //         // is it msg.sender or address(this?)
+    //         require(balances[address(this)][ticker] >= amount);
+    //         require(ticker != 'PIN');
             
-    }
+    //         if (ticker == "pine"){
+    //             return;
+    //         }
+            
+    //         bool is_in = false;
+    //         for (uint i = 0; i < tokenList.length; i++){
+    //             if (tokenList[i] == ticker){
+    //                 is_in == true;
+    //             }
+    //         }
+            
+    //         if (is_in == false){
+    //             return;
+    //         }
+            
+    //         if (side == Side.BUY){
+    //             if (balances[msg.sender]['PIN'] < amount.mul(price))
+    //             // converts zrx to pine. Pine is quoting currency
+    //                 return;
+    //             } else {
+    //             if (balances[msg.sender][ticker] < amount){
+    //                 return;
+    //             }
+    //         }
+           
+           
+    //         // update and sort orderbook
+    //         // Order newLimitOrder = Order(nextOrderID, msg.sender, side, ticker, amount, 0, price, now);
+    //         // orderBook[ticker].push(newLimitOrder);
+    //         // orderSort(orderBook[ticker]);
+            
+    //         // Order memory newLimitOrder = Order(nextOrderID, msg.sender, side, ticker, amount, 0, price, now);
+            
+    //         if (orderBook[ticker][uint(side)].length == 0){
+    //             orderBook[ticker][uint(side)].length++;
+    //             orderBook[ticker][uint(side)].push(Order(nextOrderID, msg.sender, side, ticker, amount, 0, price, now));
+    //          }else {
+    //             orderBook[ticker][uint(side)].length++;
+    //             orderBook[ticker][uint(side)].push(Order(nextOrderID, msg.sender, side, ticker, amount, 0, price, now));
+    //             if (side == Side.BUY) {
+    //             // if buy, sort limit orders with highest prices as highest priority
+    //                 sort(orderBook[ticker][uint(side)]);
+    //             } else {
+    //             // if sell, sort limit orders with
+    //             sort(orderBook[ticker][uint(side)]);
+    //             orderBook[ticker][uint(side)] = reverseArray(orderBook[ticker][uint(side)]);
+    //             }
+    //         }
+            
+    // }
  
     
     // todo: implement deleteLimitOrder, which will delete a limit order from the orderBook as long as the same trader is deleting
@@ -378,8 +466,8 @@ contract Exc is IExc{
         bytes32 ticker,
         uint amount,
         Side side)
-        // tokenExists(ticker)
-        // tokenIsNotPine(ticker)
+        tokenValid(ticker)
+        checkCurrency(ticker)
         external {
         if(side == Side.SELL) {
             require(
@@ -438,8 +526,8 @@ contract Exc is IExc{
         require(tokens[tk].tokenAddress != address(0));
         _;
     }
-    modifier checkCurrency(Token memory tk) {
-        require(tk.ticker != 'pine');
+    modifier checkCurrency(bytes32 tk) {
+        require(tk != 'PIN');
         // how do I know if it's pine or not?
         _;
     }

@@ -48,7 +48,7 @@ contract Pool {
         
         IExc(dex).deleteLimitOrder(lastSellID, token1T, IExc.Side.SELL);
         IExc(dex).deleteLimitOrder(lastBuyID, token1T, IExc.Side.BUY);
-
+        
         IExc(dex).makeLimitOrder(token1T, tokenAmount, newPrice, IExc.Side.SELL);
         IExc(dex).makeLimitOrder(token1T, SafeMath.div(pineAmount, newPrice), newPrice, IExc.Side.BUY);
         
