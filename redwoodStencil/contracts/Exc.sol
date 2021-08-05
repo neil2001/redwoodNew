@@ -60,9 +60,9 @@ contract Exc is IExc{
       external 
       view 
       returns(Token[] memory) {
-          Token[] memory returnTokens;
+          Token[] memory returnTokens = new Token[](tokenList.length);
           for (uint i = 0; i < tokenList.length; i++) {
-              returnTokens[i] = tokens[tokenList[i]];
+              returnTokens[i] = Token(tokens[tokenList[i]].ticker, tokens[tokenList[i]].tokenAddress);
           }
           return returnTokens;
     }
@@ -72,9 +72,10 @@ contract Exc is IExc{
         bytes32 ticker,
         address tokenAddress)
         external {
+            tokenList.length++;
             tokenList.push(ticker);
-            Token memory newToken = Token(ticker, tokenAddress);
-            tokens[ticker] = newToken;
+            // Token memory newToken = Token(ticker, tokenAddress);
+            tokens[ticker] = Token(ticker, tokenAddress);
     }
     
     // todo: implement deposit, which should deposit a certain amount of tokens from a trader to their on-exchange wallet,
@@ -86,8 +87,8 @@ contract Exc is IExc{
         external {
             require(balances[msg.sender][ticker] >= amount);
             IERC20(tokens[ticker].tokenAddress).transferFrom(msg.sender, address(this), amount);
-            balances[address(this)][ticker] += amount;
-            balances[msg.sender][ticker] -= amount;
+            balances[address(this)][ticker] = balances[address(this)][ticker].add(amount);
+            balances[msg.sender][ticker] -= balances[msg.sender][ticker].sub(amount);
     }
     
     // todo: implement withdraw, which should do the opposite of deposit. The trader should not be able to withdraw more than
@@ -98,9 +99,34 @@ contract Exc is IExc{
         external {
             require(balances[address(this)][ticker] >= amount);
             IERC20(tokens[ticker].tokenAddress).transferFrom(address(this), msg.sender, amount);
-            balances[address(this)][ticker] -= amount;
-             balances[msg.sender][ticker] += amount;
+            balances[address(this)][ticker] = balances[address(this)][ticker].sub(amount);
+            balances[msg.sender][ticker] = balances[msg.sender][ticker].add(amount);
      }
+     
+     function sort(Order[] memory data) public returns(Order[] memory) {
+       quickSort(data, uint(0), uint(data.length - 1));
+       return data;
+    }
+    
+    function quickSortHelp(Order[] memory arr, int left, int right) internal{
+        int i = left;
+        int j = right;
+        if(i==j) return;
+        uint pivot = arr[uint(left + (right - left) / 2)].price;
+        while (i <= j) {
+            while (arr[uint(i)].price < pivot) i++;
+            while (pivot < arr[uint(j)].price) j--;
+            if (i <= j) {
+                (arr[uint(i)], arr[uint(j)]) = (arr[uint(j)], arr[uint(i)]);
+                i++;
+                j--;
+            }
+        }
+        if (left < j)
+            quickSortHelp(arr, left, j);
+        if (i < right)
+            quickSortHelp(arr, i, right);
+    }
      
      function quickSort(Order[] memory arr, uint left, uint right) internal {
         uint pivot = arr.length/2;
@@ -128,6 +154,7 @@ contract Exc is IExc{
             }
         }
     }
+    
     function reverseArray(Order[] memory toReverse) internal returns(Order[] memory){
         Order[] memory reversedOrders;
         uint last = toReverse.length - 1;
@@ -191,20 +218,23 @@ contract Exc is IExc{
             Order memory newLimitOrder = Order(nextOrderID, msg.sender, side, ticker, amount, 0, price, now);
             
             if (orderBook[ticker][uint(side)].length == 0){
-                orderBook[ticker][uint(side)] = newLimitOrder;
+                orderBook[ticker][uint(side)].length++;
+                orderBook[ticker][uint(side)].push(newLimitOrder);
              }else {
+                orderBook[ticker][uint(side)].length++;
                 orderBook[ticker][uint(side)].push(newLimitOrder);
                 if (side == Side.BUY) {
                 // if buy, sort limit orders with highest prices as highest priority
-                    orderBook[ticker][uint(side)] = quickSort(orderBook[ticker][uint(side)]);
+                    quickSort(orderBook[ticker][uint(side)],0,orderBook[ticker][uint(side)].length-1);
                 } else {
                 // if sell, sort limit orders with
-                orderBook[ticker][uint(side)] = reverseArray(quickSort(orderBook[ticker][uint(side)]));
+                quickSort(orderBook[ticker][uint(side)],0,orderBook[ticker][uint(side)].length-1);
+                orderBook[ticker][uint(side)] = reverseArray(orderBook[ticker][uint(side)]);
                 }
             }
             
     }
- }
+ 
     
     // todo: implement deleteLimitOrder, which will delete a limit order from the orderBook as long as the same trader is deleting
     // it.
@@ -213,7 +243,7 @@ contract Exc is IExc{
         bytes32 ticker,
         Side side) external returns (bool) {
                 
-            if (!orderBook[ticker][uint(side)].length == 0) {
+            if (orderBook[ticker][uint(side)].length == 0) {
                 return false;
             }
             for (uint i = 0; i < orderBook[ticker][uint(side)].length; i++) {
@@ -225,6 +255,7 @@ contract Exc is IExc{
                         orderBook[ticker][uint(side)][j] = orderBook[ticker][uint(side)][j+1];
                     }
                     orderBook[ticker][uint(side)].pop();
+                    orderBook[ticker][uint(side)].length--;
                     return true;
                 }
             }
@@ -236,7 +267,7 @@ contract Exc is IExc{
         bytes32 ticker,
         Side side) internal returns (bool) {
                 
-            if (!orderBook[ticker][uint(side)].length == 0) {
+            if (orderBook[ticker][uint(side)].length == 0) {
                 return false;
             }
             for (uint i = 0; i < orderBook[ticker][uint(side)].length; i++) {
@@ -248,6 +279,7 @@ contract Exc is IExc{
                         orderBook[ticker][uint(side)][j] = orderBook[ticker][uint(side)][j+1];
                     }
                     orderBook[ticker][uint(side)].pop();
+                    orderBook[ticker][uint(side)].length--;
                     return true;
                 }
             }
@@ -257,43 +289,153 @@ contract Exc is IExc{
     // todo: implement makeMarketOrder, which will execute a market order on the current orderbook. The market order need not be
     // added to the book explicitly, since it should execute against a limit order immediately. Make sure you are getting rid of
     // completely filled limit orders!
+    // function makeMarketOrder(
+    //     bytes32 ticker,
+    //     uint amount,
+    //     Side side)
+    //     external {
+    //         // where the orders are always filled
+    //         // only market orders can fill limit orders/where transferring happens
+    //         require(balances[msg.sender][ticker] >= amount);
+    //         uint amountLeft = amount;
+    //         Order memory topOrder = orderBook[ticker][uint(side)][0];
+    //         uint orderNum = 0;
+    //         while (amountLeft > 0) {
+    //             if (orderNum >= orderBook[ticker][uint(side)].length) {
+    //                 return;
+    //             }
+    //             if (topOrder.filled.add(amountLeft) < topOrder.amount) {
+    //                 topOrder.filled = topOrder.filled.add(amountLeft); // does this work?
+    //                 // make market order works by using limit orders to fill the amount necessary to make the market order. We do this 
+    //                 // by taking from the orders in orderbook. If the topOrder does not fill it, we should look at the next ones and 
+    //                 // take their amounts as well.
+                    
+    //                 //should be in an if statement for the side a, also pin and token balance will change 4 statments use safemath
+    //                 // Questions for TA: what exactlty should we be updating in balances? Should we be using amounts or filled? 
+    //                 // how does an order being buy or selll affect what we do? 
+                    
+    //                 if ()
+    //                 balances[msg.sender][ticker] =  balances[msg.sender][ticker].sub(amount);
+    //                 //balances[][ticker] += amount;
+    //                 emit NewTrade(nextTradeID, topOrder.id, ticker, msg.sender, address(this), amount, topOrder.price, now);
+    //                 nextTradeID++;
+    //                 return;
+    //             } else {
+    //                 orderNum++;
+    //                 amountLeft = amountLeft.sub(topOrder.amount).add(topOrder.filled);
+    //                 // IERC20(tokens[ticker].tokenAddress).transferFrom(topOrder.trader, msg.sender, topOrder.amount.sub(topOrder.filled));
+    //                 // amount -= topOrder.amount;
+    //                 // topOrder.amount = 0;
+    //                 deleteLimitOrderInternal(topOrder.id, topOrder.ticker, topOrder.side);
+    //                 topOrder = orderBook[ticker][uint(side)][orderNum]; // messy with indices here
+    //                 emit NewTrade(nextTradeID, topOrder.id, ticker, msg.sender, address(this), amount, topOrder.price, now);
+    //             }
+    //             // emit NewTrade(uint(0), topOrder.id, ticker, msg.sender, address(this), amount, topOrder.price, now);
+    //         }
+    // }
+    // function makeMarketOrder(
+    //     bytes32 ticker,
+    //     uint amount,
+    //     Side side)
+    //     external {
+    //     uint tofill = amount;
+    //     uint counter = 0;
+        
+    //     require(balances[msg.sender][ticker] >= amount);
+    //         while (tofill > 0) {
+    //             if (counter >= orderBook[ticker][uint(side)].length) {
+    //                 return;
+    //             }
+    //             uint available = orderBook[ticker][uint(side)][counter].amount - orderBook[ticker][uint(side)][counter].filled;
+    //             if (available > tofill){
+    //                 orderBook[ticker][uint(side)][counter].filled += tofill;
+    //                 IERC20(tokens[ticker].tokenAddress).transferFrom(msg.sender, orderBook[ticker][uint(side)][counter].trader, tofill);
+    //                 emit NewTrade(nextTradeID, orderBook[ticker][uint(side)][counter].id, ticker, msg.sender, orderBook[ticker][uint(side)][counter].trader, tofill, orderBook[ticker][uint(side)][counter].price, now);
+    //                 nextTradeID++;
+    //                 tofill = 0;
+    //                 if (side == side.SELL) {
+    //                     if (ticker == "PIN") {
+    //                         balances[msg.sender][ticker] =  balances[msg.sender][ticker].add(amount);
+    //                         balances[orderBook[ticker][uint(side)][counter].trader][ticker] = balances[orderBook[ticker][uint(side)][counter].trader][ticker].sub(amount);
+    //                     } else {
+                            
+    //                     }
+    //                 } else {
+    //                     balances[msg.sender][ticker] =  balances[msg.sender][ticker].sub(amount);
+    //                 }
+    //             }else{
+    //                 tofill -= available;
+    //                 IERC20(tokens[ticker].tokenAddress).transferFrom(msg.sender, orderBook[ticker][uint(side)][counter].trader, available);
+    //                 emit NewTrade(nextTradeID, orderBook[ticker][uint(side)][counter].id, ticker, msg.sender, orderBook[ticker][uint(side)][counter].trader, available, orderBook[ticker][uint(side)][counter].price, now);
+    //                 nextTradeID++;
+    //                 delete orderBook[ticker][uint(side)][counter];
+    //             }
+    //             counter++;
+    //         }
+    // }
+    
     function makeMarketOrder(
         bytes32 ticker,
         uint amount,
         Side side)
+        // tokenExists(ticker)
+        // tokenIsNotPine(ticker)
         external {
-            // where the orders are always filled
-            // only market orders can fill limit orders/where transferring happens
-            require(balances[msg.sender][ticker] >= amount);
-            uint amountLeft = amount;
-            Order memory topOrder = orderBook[ticker][uint(side)][0];
-            uint orderNum = 0;
-            while (amountLeft > 0) {
-                if (orderNum >= orderBook[ticker][uint(side)].length) {
+        if(side == Side.SELL) {
+            require(
+                traderBalances[msg.sender][ticker] >= amount,
+                'token balance too low'
+            );
+        }
+        
+        uint tofill = amount;
+        uint counter = 0;
+            while (tofill > 0) {
+                if (counter >= orderBook[ticker][uint(side)].length) {
                     return;
                 }
-                if (topOrder.filled.add(amountLeft) < topOrder.amount) {
-                    topOrder.filled = topOrder.filled.add(amountLeft); // does this work?
-                    return;
-                } else {
-                    orderNum++;
-                    amountLeft = amountLeft.sub(topOrder.amount).add(topOrder.filled);
-                    IERC20(tokens[ticker].tokenAddress).transferFrom(topOrder.trader, msg.sender, topOrder.amount.sub(topOrder.filled));
-                    // amount -= topOrder.amount;
-                    // topOrder.amount = 0;
-                    deleteLimitOrderInternal(topOrder.id, topOrder.ticker, topOrder.side);
-                    topOrder = orderBook[ticker][uint(side)][orderNum]; // messy with indices here
+                uint available = orderBook[ticker][uint(side)][counter].amount - orderBook[ticker][uint(side)][counter].filled;
+                Order storage currOrder = orderBook[ticker][uint(side)][counter];
+                if (available > tofill) {
+                    currOrder.filled += tofill;
+                    IERC20(tokens[ticker].tokenAddress).transferFrom(msg.sender, currOrder.trader, tofill);
+                    emit NewTrade(nextTradeID, currOrder.id, ticker, msg.sender, currOrder.trader, tofill, currOrder.price, now);
+                    nextTradeID++;
+                    tofill = 0;
+                    
+                }else{
+                    tofill -= available;
+                    IERC20(tokens[ticker].tokenAddress).transferFrom(msg.sender, currOrder.trader, available);
+                    emit NewTrade(nextTradeID, currOrder.id, ticker, msg.sender, currOrder.trader, available, currOrder.price, now);
+                    nextTradeID++;
+                    deleteLimitOrderInternal(currOrder.id, ticker, side);
+                    // delete orderBook[ticker][uint(side)][counter];
                 }
-                emit NewTrade(uint(0), topOrder.id, ticker, msg.sender, address(this), amount, topOrder.price, now);
+                // are we setting balances correctly?
+                if (side == Side.SELL) {
+                        if (ticker == "PIN") {
+                            balances[msg.sender][ticker] =  balances[msg.sender][ticker].add(SafeMath.mul(amount,currOrder.price));
+                            balances[currOrder.trader][ticker] = balances[currOrder.trader][ticker].sub(SafeMath.mul(amount,currOrder.price));
+                        } else {
+                            balances[msg.sender][ticker] =  balances[msg.sender][ticker].add(amount);
+                            balances[currOrder.trader][ticker] = balances[currOrder.trader][ticker].sub(amount);
+                        }
+                    } else {
+                        if (ticker == "PIN") {
+                            balances[msg.sender][ticker] =  balances[msg.sender][ticker].sub(SafeMath.mul(amount,currOrder.price));
+                            balances[currOrder.trader][ticker] = balances[currOrder.trader][ticker].add(SafeMath.mul(amount,currOrder.price));
+                        } else {
+                            balances[msg.sender][ticker] =  balances[msg.sender][ticker].sub(amount);
+                            balances[currOrder.trader][ticker] = balances[currOrder.trader][ticker].add(amount);
+                        }
+                    }
+                counter++;
             }
-            
-            balances[msg.sender][ticker] -= amount;
-            balances[address(this)][ticker] += amount;
     }
     
     //todo: add modifiers for methods as detailed in handout
-    modifier tokenValid(Token memory tk) {
-        require(tokens[tk.ticker].isValue);
+    modifier tokenValid(bytes32 tk) {
+        require(tokens[tk].tokenAddress != address(0));
         _;
     }
     modifier checkCurrency(Token memory tk) {
