@@ -9,5 +9,5 @@ const SIDE = {
 };
 
 contract('Exc', (accounts) => {
-
+    
 });

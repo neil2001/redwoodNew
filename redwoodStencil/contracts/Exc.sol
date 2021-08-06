@@ -20,7 +20,7 @@ contract Exc is IExc{
     /// of the traders, and the IDs of the next trades and orders. Reference the NewTrade event and the IExc
     /// interface for more details about orders and sides.
     mapping(bytes32 => mapping(uint => Order[])) public orderBook;
-    mapping(address => mapping(bytes32 => uint)) public balances;
+    // mapping(address => mapping(bytes32 => uint)) public balances;
     uint public nextTradeID;
     uint public nextOrderID;
     
@@ -85,10 +85,10 @@ contract Exc is IExc{
         uint amount,
         bytes32 ticker)
         external {
-            require(balances[msg.sender][ticker] >= amount);
+            // require(balances[msg.sender][ticker] >= amount);
             IERC20(tokens[ticker].tokenAddress).transferFrom(msg.sender, address(this), amount);
-            balances[address(this)][ticker] = balances[address(this)][ticker].add(amount);
-            balances[msg.sender][ticker] = balances[msg.sender][ticker].sub(amount);
+            // balances[address(this)][ticker] = balances[address(this)][ticker].add(amount);
+            traderBalances[msg.sender][ticker] = traderBalances[msg.sender][ticker].add(amount);
     }
     
     // todo: implement withdraw, which should do the opposite of deposit. The trader should not be able to withdraw more than
@@ -97,10 +97,10 @@ contract Exc is IExc{
          uint amount,
          bytes32 ticker)
         external {
-            require(balances[address(this)][ticker] >= amount);
+            require(traderBalances[msg.sender][ticker] >= amount);
             IERC20(tokens[ticker].tokenAddress).transfer(msg.sender, amount);
-            balances[address(this)][ticker] = balances[address(this)][ticker].sub(amount);
-            balances[msg.sender][ticker] = balances[msg.sender][ticker].add(amount);
+            // balances[address(this)][ticker] = balances[address(this)][ticker].sub(amount);
+            traderBalances[msg.sender][ticker] = traderBalances[msg.sender][ticker].sub(amount);
      }
      
     //  function sort(Order[] memory data) public {
@@ -188,6 +188,8 @@ contract Exc is IExc{
                 traderBalances[msg.sender][ticker] >= amount,
                 'token balance too low'
             );
+            } else {
+                require(traderBalances[msg.sender]["PIN"] >= amount.mul(price));
             }
             require(ticker != 'PIN');
             
@@ -208,11 +210,11 @@ contract Exc is IExc{
             // }
             
             if (side == Side.BUY){
-                if (balances[msg.sender]['PIN'] < amount.mul(price))
+                if (traderBalances[msg.sender]['PIN'] < amount.mul(price))
                 // converts zrx to pine. Pine is quoting currency
                     return;
                 } else {
-                if (balances[msg.sender][ticker] < amount){
+                if (traderBalances[msg.sender][ticker] < amount){
                     return;
                 }
             }
@@ -227,6 +229,7 @@ contract Exc is IExc{
             
             // orderBook[ticker][uint(side)].length++;
             orderBook[ticker][uint(side)].push(Order(nextOrderID, msg.sender, side, ticker, amount, 0, price, now));
+            nextOrderID++;
             if (side == Side.BUY) {
                 // if buy, sort limit orders with highest prices as highest priority
                 bool swap = true;
@@ -234,8 +237,8 @@ contract Exc is IExc{
                     swap = false;
                     for (uint i = 0; i < orderBook[ticker][uint(side)].length-1; i++) {
                         if (orderBook[ticker][uint(side)][i].price < orderBook[ticker][uint(side)][i + 1].price) {
-                        Order memory temp = orderBook[ticker][uint(side)][i];
-                        orderBook[ticker][uint(side)][i] = orderBook[ticker][uint(side)][i + 1];
+                            Order memory temp = orderBook[ticker][uint(side)][i];
+                            orderBook[ticker][uint(side)][i] = orderBook[ticker][uint(side)][i + 1];
                         orderBook[ticker][uint(side)][i + 1] = temp;
                             // (orderBook[ticker][uint(side)][i], orderBook[ticker][uint(side)][i+1]) = (orderBook[ticker][uint(side)][i+1], orderBook[ticker][uint(side)][i]);
                             swap = true;
@@ -502,19 +505,19 @@ contract Exc is IExc{
                 // are we setting balances correctly?
                 if (side == Side.SELL) {
                         if (ticker == "PIN") {
-                            balances[msg.sender][ticker] =  balances[msg.sender][ticker].add(SafeMath.mul(amount,currOrder.price));
-                            balances[currOrder.trader][ticker] = balances[currOrder.trader][ticker].sub(SafeMath.mul(amount,currOrder.price));
+                            traderBalances[msg.sender][ticker] =  traderBalances[msg.sender][ticker].add(SafeMath.mul(amount,currOrder.price));
+                            traderBalances[currOrder.trader][ticker] = traderBalances[currOrder.trader][ticker].sub(SafeMath.mul(amount,currOrder.price));
                         } else {
-                            balances[msg.sender][ticker] =  balances[msg.sender][ticker].add(amount);
-                            balances[currOrder.trader][ticker] = balances[currOrder.trader][ticker].sub(amount);
+                            traderBalances[msg.sender][ticker] =  traderBalances[msg.sender][ticker].add(amount);
+                            traderBalances[currOrder.trader][ticker] = traderBalances[currOrder.trader][ticker].sub(amount);
                         }
                     } else {
                         if (ticker == "PIN") {
-                            balances[msg.sender][ticker] =  balances[msg.sender][ticker].sub(SafeMath.mul(amount,currOrder.price));
-                            balances[currOrder.trader][ticker] = balances[currOrder.trader][ticker].add(SafeMath.mul(amount,currOrder.price));
+                            traderBalances[msg.sender][ticker] =  traderBalances[msg.sender][ticker].sub(SafeMath.mul(amount,currOrder.price));
+                            traderBalances[currOrder.trader][ticker] = traderBalances[currOrder.trader][ticker].add(SafeMath.mul(amount,currOrder.price));
                         } else {
-                            balances[msg.sender][ticker] =  balances[msg.sender][ticker].sub(amount);
-                            balances[currOrder.trader][ticker] = balances[currOrder.trader][ticker].add(amount);
+                            traderBalances[msg.sender][ticker] =  traderBalances[msg.sender][ticker].sub(amount);
+                            traderBalances[currOrder.trader][ticker] = traderBalances[currOrder.trader][ticker].add(amount);
                         }
                     }
                 counter++;

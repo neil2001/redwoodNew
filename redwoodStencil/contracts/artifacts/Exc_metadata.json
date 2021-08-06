@@ -91,29 +91,6 @@
 				"constant": true,
 				"inputs": [
 					{
-						"name": "",
-						"type": "address"
-					},
-					{
-						"name": "",
-						"type": "bytes32"
-					}
-				],
-				"name": "balances",
-				"outputs": [
-					{
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"payable": false,
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"constant": true,
-				"inputs": [
-					{
 						"name": "ticker",
 						"type": "bytes32"
 					},
@@ -455,9 +432,9 @@
 	},
 	"sources": {
 		"redwoodStencil/contracts/Exc.sol": {
-			"keccak256": "0x1295c94061b3ce88b118a12405c2c31f101e108145e8789a11770282ffba683e",
+			"keccak256": "0x5248b24673ebbb2169ffe8e1736ab4426e3ad673c88f8f31eedfd0afed470c32",
 			"urls": [
-				"bzzr://a6f56aa1b1ce068a681a7fb7f43e7250a75540d2228fdea3400acd75bd9fb4b4"
+				"bzzr://01627df41e37285f68bec396379ec0647be12196518071ee521d2a4ae9797f9e"
 			]
 		},
 		"redwoodStencil/contracts/IExc.sol": {
