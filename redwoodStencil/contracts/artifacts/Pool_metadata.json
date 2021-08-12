@@ -6,6 +6,25 @@
 	"output": {
 		"abi": [
 			{
+				"constant": true,
+				"inputs": [
+					{
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"name": "numToken",
+				"outputs": [
+					{
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"constant": false,
 				"inputs": [
 					{
@@ -139,9 +158,9 @@
 	},
 	"sources": {
 		"redwoodStencil/contracts/Exc.sol": {
-			"keccak256": "0x1295c94061b3ce88b118a12405c2c31f101e108145e8789a11770282ffba683e",
+			"keccak256": "0xce34620118c9bd576d9daf0fde474610b259452df0856d2b5e8ebc3501d2d9c3",
 			"urls": [
-				"bzzr://a6f56aa1b1ce068a681a7fb7f43e7250a75540d2228fdea3400acd75bd9fb4b4"
+				"bzzr://b1054e67ef886e0c93786773d040240fadf59e65f1c6c2598c1d415fae353510"
 			]
 		},
 		"redwoodStencil/contracts/IExc.sol": {
@@ -151,9 +170,9 @@
 			]
 		},
 		"redwoodStencil/contracts/Pool.sol": {
-			"keccak256": "0x8205d4d512602c4d6f689430e0e9d17fce1fb1b799b781b3669e4bbed94c7df0",
+			"keccak256": "0xf41729a243a5f5c90263e1fa9b6e7c0452dc89e213b2f96c9de4aab8c854f06a",
 			"urls": [
-				"bzzr://082342825db6f9055ff77261a6784414c523020ec71fbcb6f49ea5f6ace63600"
+				"bzzr://4b74b05b0b531404f2ef7c06f52f48ef7f8594a3de3c4bc4e4983d08111bad5a"
 			]
 		},
 		"redwoodStencil/contracts/libraries/GSN/Context.sol": {

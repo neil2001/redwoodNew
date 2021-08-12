@@ -6,61 +6,6 @@
 	"output": {
 		"abi": [
 			{
-				"constant": true,
-				"inputs": [
-					{
-						"name": "",
-						"type": "bytes32"
-					},
-					{
-						"name": "",
-						"type": "uint256"
-					},
-					{
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"name": "orderBook",
-				"outputs": [
-					{
-						"name": "id",
-						"type": "uint256"
-					},
-					{
-						"name": "trader",
-						"type": "address"
-					},
-					{
-						"name": "side",
-						"type": "uint8"
-					},
-					{
-						"name": "ticker",
-						"type": "bytes32"
-					},
-					{
-						"name": "amount",
-						"type": "uint256"
-					},
-					{
-						"name": "filled",
-						"type": "uint256"
-					},
-					{
-						"name": "price",
-						"type": "uint256"
-					},
-					{
-						"name": "date",
-						"type": "uint256"
-					}
-				],
-				"payable": false,
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
 				"constant": false,
 				"inputs": [
 					{
@@ -350,12 +295,86 @@
 				"type": "function"
 			},
 			{
+				"constant": false,
+				"inputs": [
+					{
+						"name": "arr",
+						"type": "uint256[]"
+					}
+				],
+				"name": "bubbleSort",
+				"outputs": [
+					{
+						"name": "",
+						"type": "uint256[]"
+					}
+				],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
 				"constant": true,
 				"inputs": [],
 				"name": "nextOrderID",
 				"outputs": [
 					{
 						"name": "",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"name": "",
+						"type": "bytes32"
+					},
+					{
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "orderbook",
+				"outputs": [
+					{
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"name": "trader",
+						"type": "address"
+					},
+					{
+						"name": "side",
+						"type": "uint8"
+					},
+					{
+						"name": "ticker",
+						"type": "bytes32"
+					},
+					{
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"name": "filled",
+						"type": "uint256"
+					},
+					{
+						"name": "price",
+						"type": "uint256"
+					},
+					{
+						"name": "date",
 						"type": "uint256"
 					}
 				],
@@ -409,6 +428,65 @@
 				],
 				"name": "NewTrade",
 				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"name": "trader",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"name": "ticker",
+						"type": "bytes32"
+					},
+					{
+						"indexed": false,
+						"name": "side",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"name": "price",
+						"type": "uint256"
+					}
+				],
+				"name": "NewLimitOrder",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"name": "ticker",
+						"type": "bytes32"
+					},
+					{
+						"indexed": false,
+						"name": "token",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"name": "trader",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "Deposit",
+				"type": "event"
 			}
 		],
 		"devdoc": {
@@ -432,9 +510,9 @@
 	},
 	"sources": {
 		"redwoodStencil/contracts/Exc.sol": {
-			"keccak256": "0x5248b24673ebbb2169ffe8e1736ab4426e3ad673c88f8f31eedfd0afed470c32",
+			"keccak256": "0x3121e4685b28a184681ef5fd1d9de1156964e2fb8f797125148f4a7f163a5820",
 			"urls": [
-				"bzzr://01627df41e37285f68bec396379ec0647be12196518071ee521d2a4ae9797f9e"
+				"bzzr://91700cf6c4a1d2351030e0228069fd6ae9703d03bc13f0f35b04ed7576813234"
 			]
 		},
 		"redwoodStencil/contracts/IExc.sol": {
